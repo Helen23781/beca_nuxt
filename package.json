@@ -1,0 +1,19 @@
+{
+  "name": "beca_nuxt",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/Helen23781/beca_nuxt.git",
+  "author": "Helen23781 <cardenaselena247@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "dev": "nodemon app.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "nodemon": "^3.1.7",
+    "pg": "^8.13.1",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.37.5"
+  }
+}
