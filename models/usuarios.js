@@ -1,24 +1,22 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../helpers/database");
 
-const Cuartos = require("./cuartos")
-
 /**
  * @swagger
  * components:
  *   schemas:
- *     Torres:
+ *     Usuario:
  *       type: object
  *       properties:
  *         id:
  *           type: integer
- *           description: El ID de la torre.
- *         jefe_torre:
+ *           description: El ID del usuario.
+ *         nombre_usuario:
  *           type: string
- *           description: El nombre del jefe de la torre.
- *         nombre_torre:
+ *           description: El nombre de usuario.
+ *         contrasena:
  *           type: string
- *           description: El nombre de la torre.
+ *           description: La contraseña del usuario.
  *         createdAt:
  *           type: string
  *           format: date-time
@@ -27,18 +25,19 @@ const Cuartos = require("./cuartos")
  *           type: string
  *           format: date-time
  *           description: Fecha de actualización.
- *       required:
- *         - jefe_torre
- *         - nombre_torre
+ *         deletedAt:
+ *           type: string
+ *           format: date-time
+ *           description: Fecha de eliminación (si aplica).
  */
 
 
-const Torres = sequelize.define("torres", {
-    jefe_torre: {
+const Usuarios = sequelize.define("usuarios", {
+    nombre_usuario: {
         type: DataTypes.STRING,
         allowNull: false,
     },
-    nombre_torre: {
+    contrasena: {
         type: DataTypes.STRING,
         allowNull: false,
     },
@@ -47,14 +46,5 @@ const Torres = sequelize.define("torres", {
     timestamps: true,
     paranoid: true,
 });
-Torres.hasMany(Cuartos, {
-    foreignKey: "torreid",
-    onDelete: "CASCADE",
-    onUpdate: "CASCADE",
-  });
-  Cuartos.belongsTo(Torres, {
-    foreignKey: "torreid",
-    onDelete: "CASCADE",
-    onUpdate: "CASCADE",
-  });
-module.exports = Torres;
+
+module.exports = Usuarios;
