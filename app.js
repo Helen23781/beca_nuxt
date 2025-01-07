@@ -8,6 +8,7 @@ const swaggerJsdoc = require("swagger-jsdoc");
 
 //Importacion de Winston
 const errorHandler = require("./middlewares/errorHandler.js");
+const requestLogger = require("./middlewares/requestLogger.js");
 
 //Importacion de el cors
 require("dotenv").config();
@@ -65,6 +66,7 @@ app.use(
 
 //Middleware de la aplicacion
 
+app.use(requestLogger);
 //uso de las rutas
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
@@ -79,6 +81,8 @@ app.use(errorHandler);
 
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
+
+// Uso del middleware de requestLogger
 
 app.listen(process.env.PORT, () => {
   console.log(`Servidor iniciado en el puerto ${process.env.PORT}`);
