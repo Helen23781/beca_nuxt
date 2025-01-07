@@ -8,9 +8,11 @@
 
 const Beca = require("../models/becas");
 
-const getBeca= async () => {
+const getBeca = async () => {
   try {
-    const becas = await Beca.findAll();
+    const becas = await Beca.findAll({
+      attributes: ['id', 'nombre_beca','jefe_beca']
+    });
     return becas;
   } catch (error) {
     throw error;

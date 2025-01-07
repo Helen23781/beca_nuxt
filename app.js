@@ -1,10 +1,10 @@
 const sequelize = require("./helpers/database.js");
 const express = require("express");
+const cors = require("cors");
+const bodyParser = require('body-parser');
 
 const swaggerUi = require("swagger-ui-express");
 const swaggerJsdoc = require("swagger-jsdoc");
-
-const cors = require("cors");
 
 //Importacion de Winston
 const errorHandler = require("./middlewares/errorHandler.js");
@@ -13,12 +13,11 @@ const errorHandler = require("./middlewares/errorHandler.js");
 require("dotenv").config();
 
 //importacion de los modelos
-
+const Estudiantes = require("./models/estudiantes.js");
 const Cuartos = require("./models/cuartos.js");
 const Torres = require("./models/torres.js");
 const Pisos = require("./models/pisos.js");
 const Becas = require("./models/becas.js");
-
 const Usuarios = require("./models/usuarios.js");
 
 // Importacion de las rutas
@@ -27,7 +26,7 @@ const becaRoutes = require("./routes/becaRoutes.js");
 const pisoRoutes = require("./routes/pisoRoutes.js");
 const torreRoutes = require("./routes/torreRoutes.js");
 const cuartoRoutes = require("./routes/cuartoRoutes.js");
-
+const estudianteRoutes = require("./routes/estudianteRoutes.js");
 //Swagger definitions
 const options = {
   definition: {
@@ -74,13 +73,17 @@ app.use("/", becaRoutes);
 app.use("/", pisoRoutes);
 app.use("/", torreRoutes);
 app.use("/", cuartoRoutes);
+app.use("/", estudianteRoutes);
 
 app.use(errorHandler);
 
-app.listen(3000, () => {
-  console.log("Servidor iniciado en el puerto 3000");
-  console.log("http://localhost:3000");
-  console.log("Documentacion de swagger: http://localhost:3000/api-docs");
+app.use(bodyParser.json({ limit: '10mb' }));
+app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
+
+app.listen(process.env.PORT, () => {
+  console.log(`Servidor iniciado en el puerto ${process.env.PORT}`);
+  console.log(`http://localhost:${process.env.PORT}`);
+  console.log(`Documentacion de swagger: http://localhost:${process.env.PORT}/api-docs`);
 });
 
 // Sincronizar los modelos para verificar la conexión con la base de datos

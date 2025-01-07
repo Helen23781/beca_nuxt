@@ -68,7 +68,7 @@ router.post("/pisos/create", async (req, res, next) => {
     const { numero_piso, jefe_piso, becaId } = req.body;
 
     if (!numero_piso || !jefe_piso || !becaId) {
-      throw new AppError("Todos los campos son reuqeridos", 400);
+      throw new AppError("Todos los campos son requeridos", 400);
     }
     const piso = await createPiso(numero_piso, jefe_piso, becaId);
     res.status(201).json(piso);
@@ -102,6 +102,8 @@ router.post("/pisos/create", async (req, res, next) => {
  *                 type: string
  *               jefe_piso:
  *                 type: string
+ *               becaId:
+ *                 type: integer
  *     responses:
  *       200:
  *         description: Piso actualizado
@@ -113,26 +115,32 @@ router.post("/pisos/create", async (req, res, next) => {
  *         description: Error de servidor
  */
 router.put("/pisos/update/:id", async (req, res, next) => {
-  //:id es para recibir parámetros
   try {
-    const { numero_piso, jefe_piso } = req.body;
+    const { numero_piso, jefe_piso, becaId } = req.body;
     const { id } = req.params;
 
     if (!id) {
       throw new AppError("El id es requerido", 400);
     }
 
-    if (!numero_piso || !jefe_piso) {
-      throw new AppError("Todos los campos son reuqeridos", 400);
+    if (!numero_piso || !jefe_piso || !becaId) {
+      throw new AppError("Todos los campos son requeridos", 400);
     }
-    const piso = await updatePiso(id, numero_piso, jefe_piso);
+
+    const piso = await updatePiso(id, numero_piso, jefe_piso, becaId);
     if (piso == 0) {
       throw new AppError("Piso no encontrado", 404);
     }
 
-    res.status(200).json({ mensaje: "Piso actualizado " });
+    res.status(200).json({ 
+      mensaje: "Piso actualizado",
+      id: id,
+      numero_piso,
+      jefe_piso,
+      becaId 
+    });
   } catch (error) {
-  next(error);//Error de servidor 500
+    next(error);
   }
 });
 
@@ -161,7 +169,6 @@ router.put("/pisos/update/:id", async (req, res, next) => {
  *         description: Error de servidor
  */
 router.delete("/pisos/delete/:id", async (req, res, next) => {
-  //:id es para recibir parámetros
   try {
     const { id } = req.params;
 

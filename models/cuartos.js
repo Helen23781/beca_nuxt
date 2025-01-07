@@ -1,3 +1,6 @@
+const { DataTypes } = require("sequelize");
+const sequelize = require("../helpers/database");
+const Estudiantes = require("./estudiantes");
 /**
  * @swagger
  * components:
@@ -17,23 +20,34 @@
  *         - numero_cuarto
  *         - capacidad_maxima
  */
-const { DataTypes } = require("sequelize");
-const sequelize = require("../helpers/database");
 
-const Cuartos = sequelize.define("cuartos", {
+const Cuartos = sequelize.define(
+  "cuartos",
+  {
     numero_cuarto: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
-   capacidad_maxima: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
+    capacidad_maxima: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
-    
-}, {
+  },
+  {
     timestamps: true,
     paranoid: true,
-});
+  }
+);
 
+Cuartos.hasMany(Estudiantes, {
+  foreignKey: "cuartoid",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+Estudiantes.belongsTo(Cuartos, {
+  foreignKey: "cuartoid",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
 
 module.exports = Cuartos;

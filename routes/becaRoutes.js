@@ -4,6 +4,7 @@
 //delete
 const router = require("express").Router();
 const AppError = require("../error/AppError")
+
 const {
   createBeca,
   deleteBeca,
@@ -27,6 +28,11 @@ const {
  *               type: array
  *               items:
  *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                   nombre_beca:
+ *                     type: string
  *       500:
  *         description: Error de servidor
  */
@@ -35,7 +41,7 @@ router.get("/becas", async (req, res, next) => {
     const becas = await getBeca();
     res.status(200).json(becas);
   } catch (error) {
-    next(error); //Error de servidor 500
+    next(error);
   }
 });
 

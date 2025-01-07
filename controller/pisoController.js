@@ -1,11 +1,3 @@
-//500 Error de servidor 
-//200 todo bien 
-//201 todo bien y recurso creado 
-//404 no encontrado
-//400 bad request (peticion erronea)
-//401 no autorizado 
-//403 prohibido
-
 const Piso = require("../models/pisos");
 
 const getPiso = async () => {

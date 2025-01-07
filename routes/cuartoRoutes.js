@@ -1,13 +1,13 @@
 const router = require("express").Router();
-const AppError = require("../error/AppError")
 
 const {
   createCuarto,
   deleteCuarto,
   getCuarto,
   updateCuarto,
+  getCuartosPorTorre,
 } = require("../controller/cuartoController");
-
+const AppError = require("../error/AppError");
 /**
  * @swagger
  * /cuartos:
@@ -65,23 +65,25 @@ router.get("/cuartos", async (req, res, next) => {
  *         description: Error de servidor
  */
 router.post("/cuartos/create", async (req, res, next) => {
+  console.log(req.body)
   try {
     const { numero_cuarto, capacidad_maxima, torreid } = req.body;
-    console.log("hoallaalallal");
 
     if (!numero_cuarto || !capacidad_maxima || !torreid) {
-      throw new AppError("Todos los campos son reuqeridos", 400);
+      throw new AppError("Todos los campos son requeridos", 400);
     }
+
     const cuarto = await createCuarto(numero_cuarto, capacidad_maxima, torreid);
     res.status(201).json(cuarto);
   } catch (error) {
-    next(error); //Error de servidor 500
+    next(error);
   }
 });
 
+
 /**
  * @swagger
- * /cuartos/update/{id}:
+ * /cuartos/update/{id}: 
  *   put:
  *     summary: Actualiza un cuarto existente
  *     tags:
@@ -104,6 +106,8 @@ router.post("/cuartos/create", async (req, res, next) => {
  *                 type: string
  *               capacidad_maxima:
  *                 type: integer
+ *               torreId:
+ *                 type: integer
  *     responses:
  *       200:
  *         description: Cuarto actualizado
@@ -117,24 +121,30 @@ router.post("/cuartos/create", async (req, res, next) => {
 router.put("/cuartos/update/:id", async (req, res, next) => {
   //:id es para recibir parámetros
   try {
-    const { numero_cuarto, capacidad_maxima } = req.body;
+    const { numero_cuarto, capacidad_maxima, torreId } = req.body;
     const { id } = req.params;
 
     if (!id) {
       throw new AppError("El id es requerido", 400);
     }
 
-    if (!numero_cuarto || !capacidad_maxima) {
+    if (!numero_cuarto || !capacidad_maxima || !torreId) {
       throw new AppError("Todos los campos son reuqeridos", 400);
     }
-    const cuarto = await updateCuarto(id, numero_cuarto, capacidad_maxima);
+    const cuarto = await updateCuarto(id, numero_cuarto, capacidad_maxima, torreId);
     if (cuarto == 0) {
       throw new AppError("Cuarto no encontrado", 404);
     }
 
-    res.status(200).json({ mensaje: "Cuarto actualizado " });
+    res.status(200).json({
+      mensaje: "Cuarto actualizado",
+      id: id,
+      numero_cuarto,
+      capacidad_maxima,
+      torreId,
+    });
   } catch (error) {
-    next(error); //Error de servidor 500
+    next(error);
   }
 });
 
@@ -179,6 +189,47 @@ router.delete("/cuartos/delete/:id", async (req, res, next) => {
     res.status(200).json({ mensaje: "Cuarto eliminado " });
   } catch (error) {
     next(error); //Error de servidor 500
+  }
+});
+
+/**
+ * @swagger
+ * /cuartos/torre/{torreId}:
+ *   get:
+ *     summary: Obtiene una lista de cuartos por torre
+ *     tags:
+ *       - Cuarto
+ *     parameters:
+ *       - in: path
+ *         name: torreId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID de la torre
+ *     responses:
+ *       200:
+ *         description: Lista de cuartos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *       404:
+ *         description: Cuartos no encontrados
+ *       500:
+ *         description: Error de servidor
+ */
+router.get("/cuartos/torre/:torreId", async (req, res, next) => {
+  try {
+    const { torreId } = req.params;
+    const cuartos = await getCuartosPorTorre(torreId);
+    if (!cuartos.length) {
+      return res.status(404).json({ mensaje: "Cuartos no encontrados" });
+    }
+    res.status(200).json(cuartos);
+  } catch (error) {
+    next(error);
   }
 });
 
