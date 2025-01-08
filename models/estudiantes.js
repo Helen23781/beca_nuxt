@@ -69,9 +69,10 @@ const Estudiantes = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    cuartoId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
+    
+    foto: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
     // Otros campos del modelo Estudiantes
   },

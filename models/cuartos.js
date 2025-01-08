@@ -40,12 +40,12 @@ const Cuartos = sequelize.define(
 );
 
 Cuartos.hasMany(Estudiantes, {
-  foreignKey: "cuartoid",
+  foreignKey: "cuartoId",
   onDelete: "CASCADE",
   onUpdate: "CASCADE",
 });
 Estudiantes.belongsTo(Cuartos, {
-  foreignKey: "cuartoid",
+  foreignKey: "cuartoId",
   onDelete: "CASCADE",
   onUpdate: "CASCADE",
 });

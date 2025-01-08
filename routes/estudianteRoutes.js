@@ -59,7 +59,7 @@ router.get("/estudiantes", async (req, res, next) => {
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             properties:
@@ -77,6 +77,9 @@ router.get("/estudiantes", async (req, res, next) => {
  *                 type: string
  *               cuartoId:
  *                 type: string
+ *               foto:
+ *                 type: string
+ *                 format: binary
  *     responses:
  *       201:
  *         description: Estudiante creado
@@ -88,10 +91,10 @@ router.get("/estudiantes", async (req, res, next) => {
 router.post("/estudiantes/create", upload.single("foto"), async (req, res, next) => {
   try {
     const { nombre_estudiante, apellido_estudiante, anio_academico, edad, carrera, facultad, cuartoId } = req.body;
-    const foto = req.file ? req.file.path : null;
+    const foto = req.file ? req.file.filename : null;
 
     if (!nombre_estudiante || !apellido_estudiante || !anio_academico || !edad || !carrera || !facultad || !cuartoId) {
-      throw new AppError("Todos los campos son requeridos", 400);
+      throw new AppError("Todos los campos son requeridos", 400); 
     }
 
     const estudiante = await createEstudiante(nombre_estudiante, apellido_estudiante, anio_academico, edad, carrera, facultad, cuartoId, foto);
@@ -99,6 +102,7 @@ router.post("/estudiantes/create", upload.single("foto"), async (req, res, next)
   } catch (error) {
     next(error);
   }
+  
 });
 
 /**
@@ -118,7 +122,7 @@ router.post("/estudiantes/create", upload.single("foto"), async (req, res, next)
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             properties:
@@ -136,6 +140,9 @@ router.post("/estudiantes/create", upload.single("foto"), async (req, res, next)
  *                 type: string
  *               cuartoId:
  *                 type: string
+ *               foto:
+ *                 type: string
+ *                 format: binary
  *     responses:
  *       200:
  *         description: Estudiante actualizado
@@ -150,7 +157,7 @@ router.put("/estudiantes/update/:id", upload.single("foto"), async (req, res, ne
   try {
     const { nombre_estudiante, apellido_estudiante, anio_academico, edad, carrera, facultad, cuartoId } = req.body;
     const { id } = req.params;
-    const foto = req.file ? req.file.path : null;
+    const foto = req.file ? req.file.filename : null;
 
     if (!id) {
       throw new AppError("El id es requerido", 400);
