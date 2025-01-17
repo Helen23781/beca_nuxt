@@ -2,12 +2,12 @@ const router = require("express").Router();
 const multer = require("multer");
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'uploads/');
+    cb(null, "uploads/");
   },
   filename: function (req, file, cb) {
     const ext = path.extname(file.originalname);
-    cb(null, file.fieldname + '-' + Date.now() + ext);
-  }
+    cb(null, file.fieldname + "-" + Date.now() + ext);
+  },
 });
 
 const upload = multer({ storage: storage });
@@ -20,6 +20,7 @@ const {
   updateEstudiante,
 } = require("../controller/estudianteController");
 const AppError = require("../error/AppError");
+const authenticate = require("../middlewares/authenticate");
 
 /**
  * @swagger
@@ -40,14 +41,18 @@ const AppError = require("../error/AppError");
  *       500:
  *         description: Error de servidor
  */
-router.get("/estudiantes", async (req, res, next) => {
-  try {
-    const estudiantes = await getEstudiantes();
-    res.status(200).json(estudiantes);
-  } catch (error) {
-    next(error);
+router.get(
+  "/estudiantes",
+  authenticate(["administrador", "gestor"]),
+  async (req, res, next) => {
+    try {
+      const estudiantes = await getEstudiantes();
+      res.status(200).json(estudiantes);
+    } catch (error) {
+      next(error);
+    }
   }
-});
+);
 
 /**
  * @swagger
@@ -88,22 +93,51 @@ router.get("/estudiantes", async (req, res, next) => {
  *       500:
  *         description: Error de servidor
  */
-router.post("/estudiantes/create", upload.single("foto"), async (req, res, next) => {
-  try {
-    const { nombre_estudiante, apellido_estudiante, anio_academico, edad, carrera, facultad, cuartoId } = req.body;
-    const foto = req.file ? req.file.filename : null;
+router.post(
+  "/estudiantes/create",
+  upload.single("foto"),
+  authenticate(["administrador", "gestor"]),
+  async (req, res, next) => {
+    try {
+      const {
+        nombre_estudiante,
+        apellido_estudiante,
+        anio_academico,
+        edad,
+        carrera,
+        facultad,
+        cuartoId,
+      } = req.body;
+      const foto = req.file ? req.file.filename : null;
 
-    if (!nombre_estudiante || !apellido_estudiante || !anio_academico || !edad || !carrera || !facultad || !cuartoId) {
-      throw new AppError("Todos los campos son requeridos", 400); 
+      if (
+        !nombre_estudiante ||
+        !apellido_estudiante ||
+        !anio_academico ||
+        !edad ||
+        !carrera ||
+        !facultad ||
+        !cuartoId
+      ) {
+        throw new AppError("Todos los campos son requeridos", 400);
+      }
+
+      const estudiante = await createEstudiante(
+        nombre_estudiante,
+        apellido_estudiante,
+        anio_academico,
+        edad,
+        carrera,
+        facultad,
+        cuartoId,
+        foto
+      );
+      res.status(201).json(estudiante);
+    } catch (error) {
+      next(error);
     }
-
-    const estudiante = await createEstudiante(nombre_estudiante, apellido_estudiante, anio_academico, edad, carrera, facultad, cuartoId, foto);
-    res.status(201).json(estudiante);
-  } catch (error) {
-    next(error);
   }
-  
-});
+);
 
 /**
  * @swagger
@@ -153,41 +187,72 @@ router.post("/estudiantes/create", upload.single("foto"), async (req, res, next)
  *       500:
  *         description: Error de servidor
  */
-router.put("/estudiantes/update/:id", upload.single("foto"), async (req, res, next) => {
-  try {
-    const { nombre_estudiante, apellido_estudiante, anio_academico, edad, carrera, facultad, cuartoId } = req.body;
-    const { id } = req.params;
-    const foto = req.file ? req.file.filename : null;
+router.put(
+  "/estudiantes/update/:id",
+  upload.single("foto"),
+  authenticate(["administrador", "gestor"]),
+  async (req, res, next) => {
+    try {
+      const {
+        nombre_estudiante,
+        apellido_estudiante,
+        anio_academico,
+        edad,
+        carrera,
+        facultad,
+        cuartoId,
+      } = req.body;
+      const { id } = req.params;
+      const foto = req.file ? req.file.filename : null;
 
-    if (!id) {
-      throw new AppError("El id es requerido", 400);
+      if (!id) {
+        throw new AppError("El id es requerido", 400);
+      }
+
+      if (
+        !nombre_estudiante ||
+        !apellido_estudiante ||
+        !anio_academico ||
+        !edad ||
+        !carrera ||
+        !facultad ||
+        !cuartoId
+      ) {
+        throw new AppError("Todos los campos son requeridos", 400);
+      }
+
+      const estudiante = await updateEstudiante(
+        id,
+        nombre_estudiante,
+        apellido_estudiante,
+        anio_academico,
+        edad,
+        carrera,
+        facultad,
+        cuartoId,
+        foto
+      );
+      if (estudiante == 0) {
+        throw new AppError("Estudiante no encontrado", 404);
+      }
+
+      res.status(200).json({
+        mensaje: "Estudiante actualizado",
+        id: id,
+        nombre_estudiante,
+        apellido_estudiante,
+        anio_academico,
+        edad,
+        carrera,
+        facultad,
+        cuartoId,
+        foto,
+      });
+    } catch (error) {
+      next(error);
     }
-
-    if (!nombre_estudiante || !apellido_estudiante || !anio_academico || !edad || !carrera || !facultad || !cuartoId) {
-      throw new AppError("Todos los campos son requeridos", 400);
-    }
-
-    const estudiante = await updateEstudiante(id, nombre_estudiante, apellido_estudiante, anio_academico, edad, carrera, facultad, cuartoId, foto);
-    if (estudiante == 0) {
-      throw new AppError("Estudiante no encontrado", 404);
-    }
-
-    res.status(200).json({
-      mensaje: "Estudiante actualizado",
-      id: id,
-      nombre_estudiante,
-      apellido_estudiante,
-      anio_academico,
-      edad,
-      carrera,
-      facultad,
-      cuartoId,
-      foto
-    });
-  } catch (error) {
-    next(error);
   }
-});
+);
 
 /**
  * @swagger
@@ -213,24 +278,28 @@ router.put("/estudiantes/update/:id", upload.single("foto"), async (req, res, ne
  *       500:
  *         description: Error de servidor
  */
-router.delete("/estudiantes/delete/:id", async (req, res, next) => {
-  try {
-    const { id } = req.params;
+router.delete(
+  "/estudiantes/delete/:id",
+  authenticate(["administrador", "gestor"]),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
 
-    if (!id) {
-      throw new AppError("El id es requerido", 400);
+      if (!id) {
+        throw new AppError("El id es requerido", 400);
+      }
+
+      const estudiante = await deleteEstudiante(id);
+      if (estudiante == 0) {
+        throw new AppError("Estudiante no encontrado", 404);
+      }
+
+      res.status(200).json({ mensaje: "Estudiante eliminado" });
+    } catch (error) {
+      next(error);
     }
-
-    const estudiante = await deleteEstudiante(id);
-    if (estudiante == 0) {
-      throw new AppError("Estudiante no encontrado", 404);
-    }
-
-    res.status(200).json({ mensaje: "Estudiante eliminado" });
-  } catch (error) {
-    next(error);
   }
-});
+);
 
 /**
  * @swagger
@@ -254,18 +323,22 @@ router.delete("/estudiantes/delete/:id", async (req, res, next) => {
  *       500:
  *         description: Error de servidor
  */
-router.get("/estudiantes/:id", async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const estudiante = await getEstudianteById(id);
-    if (!estudiante) {
-      throw new AppError("Estudiante no encontrado", 404);
+router.get(
+  "/estudiantes/:id",
+  authenticate(["administrador", "gestor"]),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const estudiante = await getEstudianteById(id);
+      if (!estudiante) {
+        throw new AppError("Estudiante no encontrado", 404);
+      }
+      res.status(200).json(estudiante);
+    } catch (error) {
+      next(error);
     }
-    res.status(200).json(estudiante);
-  } catch (error) {
-    next(error);
   }
-});
+);
 
 /**
  * @swagger
@@ -294,15 +367,19 @@ router.get("/estudiantes/:id", async (req, res, next) => {
  *       500:
  *         description: Error de servidor
  */
-router.get("/estudiantes/foto/:filename", (req, res, next) => {
-  const { filename } = req.params;
-  const filePath = path.join(__dirname, "../uploads", filename);
+router.get(
+  "/estudiantes/foto/:filename",
+  authenticate(["administrador", "gestor"]),
+  (req, res, next) => {
+    const { filename } = req.params;
+    const filePath = path.join(__dirname, "../uploads", filename);
 
-  res.sendFile(filePath, (err) => {
-    if (err) {
-      next(new AppError("Foto no encontrada", 404));
-    }
-  });
-});
+    res.sendFile(filePath, (err) => {
+      if (err) {
+        next(new AppError("Foto no encontrada", 404));
+      }
+    });
+  }
+);
 
-module.exports = router; 
+module.exports = router;

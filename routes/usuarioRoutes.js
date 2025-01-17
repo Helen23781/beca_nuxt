@@ -4,6 +4,7 @@
 //delete
 const router = require("express").Router();
 const AppError = require("../error/AppError")
+const authenticate = require("../middlewares/authenticate");
 
 const {
   createUsuario,
@@ -31,7 +32,9 @@ const {
  *       500:
  *         description: Error de servidor
  */
-router.get("/usuarios", async (req, res, next) => {
+router.get("/usuarios",
+  authenticate(["administrador"]),
+   async (req, res, next) => {
   try {
     const usuarios = await getUsuario();
     res.status(200).json(usuarios);
@@ -58,6 +61,8 @@ router.get("/usuarios", async (req, res, next) => {
  *                 type: string
  *               contrasena:
  *                 type: string
+ *               role:
+ *                 type: string
  *     responses:
  *       201:
  *         description: Usuario creado
@@ -66,15 +71,16 @@ router.get("/usuarios", async (req, res, next) => {
  *       500:
  *         description: Error de servidor
  */
-router.post("/usuarios/create", async (req, res, next) => {
+  authenticate(["administrador"]),
+  router.post("/usuarios/create",  async (req, res, next) => {
   try {
-    const { nombre_usuario, contrasena } = req.body;
+    const { nombre_usuario, contrasena, role } = req.body;
     console.log("hoallaalallal");
 
-    if (!nombre_usuario || !contrasena) {
+    if (!nombre_usuario || !contrasena || !role) {
       throw new AppError("Todos los campos son reuqeridos", 400);
     }
-    const usuario = await createUsuario(nombre_usuario, contrasena);
+    const usuario = await createUsuario(nombre_usuario, contrasena, role);
     res.status(201).json(usuario);
   } catch (error) {
     next(error); //Error de servidor 500
@@ -106,6 +112,8 @@ router.post("/usuarios/create", async (req, res, next) => {
  *                 type: string
  *               contrasena:
  *                 type: string
+ *               role:
+ *                 type: string
  *     responses:
  *       200:
  *         description: Usuario actualizado
@@ -116,7 +124,9 @@ router.post("/usuarios/create", async (req, res, next) => {
  *       500:
  *         description: Error de servidor
  */
-router.put("/usuarios/update/:id", async (req, res, next) => {
+router.put("/usuarios/update/:id", 
+  authenticate(["administrador"]),
+  async (req, res, next) => {
   //:id es para rcibir parametros
   try {
     const { nombre_usuario, contrasena } = req.body;
@@ -164,7 +174,9 @@ router.put("/usuarios/update/:id", async (req, res, next) => {
  *       500:
  *         description: Error de servidor
  */
-router.delete("/usuarios/delete/:id", async (req, res, next) => {
+router.delete("/usuarios/delete/:id",
+  authenticate(["administrador"]),
+   async (req, res, next) => {
   //:id es para rcibir parametros
   try {
     const { id } = req.params;
@@ -183,5 +195,6 @@ router.delete("/usuarios/delete/:id", async (req, res, next) => {
     next(error); //Error de servidor 500
   }
 });
+
 
 module.exports = router;

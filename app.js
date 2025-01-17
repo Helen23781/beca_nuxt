@@ -28,6 +28,7 @@ const pisoRoutes = require("./routes/pisoRoutes.js");
 const torreRoutes = require("./routes/torreRoutes.js");
 const cuartoRoutes = require("./routes/cuartoRoutes.js");
 const estudianteRoutes = require("./routes/estudianteRoutes.js");
+const authRoutes = require("./routes/authRoutes.js");
 //Swagger definitions
 const options = {
   definition: {
@@ -42,6 +43,20 @@ const options = {
         url: "",
       },
     },
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+        },
+      },
+    },
+    security: [
+      {
+        bearerAuth: [],
+      },
+    ],
   },
   apis: ["./routes/*.js", "./models/*.js"],
 };
@@ -76,6 +91,7 @@ app.use("/", pisoRoutes);
 app.use("/", torreRoutes);
 app.use("/", cuartoRoutes);
 app.use("/", estudianteRoutes);
+app.use("/", authRoutes);
 
 app.use(errorHandler);
 

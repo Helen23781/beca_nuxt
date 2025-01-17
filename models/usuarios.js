@@ -31,20 +31,34 @@ const sequelize = require("../helpers/database");
  *           description: Fecha de eliminación (si aplica).
  */
 
-
-const Usuarios = sequelize.define("usuarios", {
+const Usuarios = sequelize.define(
+  "usuarios",
+  {
     nombre_usuario: {
-        type: DataTypes.STRING,
-        allowNull: false,
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     contrasena: {
-        type: DataTypes.STRING,
-        allowNull: false,
+      type: DataTypes.STRING,
+      allowNull: false,
     },
-    
-}, {
+    role: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    twoFactorSecret: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    twoFactorEnabled: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+  },
+  {
     timestamps: true,
     paranoid: true,
-});
+  }
+);
 
 module.exports = Usuarios;

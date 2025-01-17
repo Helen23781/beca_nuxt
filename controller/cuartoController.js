@@ -74,7 +74,7 @@ const getCuartosPorTorre = async (torreId) => {
     return cuartos;
   } catch (error) {
     throw error;
-  }
+  } 
 };
 
 module.exports = { createCuarto, updateCuarto, getCuarto, deleteCuarto, getCuartosPorTorre };

@@ -63,19 +63,23 @@ router.get("/pisos", async (req, res, next) => {
  *       500:
  *         description: Error de servidor
  */
-router.post("/pisos/create", async (req, res, next) => {
-  try {
-    const { numero_piso, jefe_piso, becaId } = req.body;
+router.post(
+  "/pisos/create",
+  authenticate(["administrador", "gestor"]),
+  async (req, res, next) => {
+    try {
+      const { numero_piso, jefe_piso, becaId } = req.body;
 
-    if (!numero_piso || !jefe_piso || !becaId) {
-      throw new AppError("Todos los campos son requeridos", 400);
+      if (!numero_piso || !jefe_piso || !becaId) {
+        throw new AppError("Todos los campos son requeridos", 400);
+      }
+      const piso = await createPiso(numero_piso, jefe_piso, becaId);
+      res.status(201).json(piso);
+    } catch (error) {
+      next(error); //Error de servidor 500
     }
-    const piso = await createPiso(numero_piso, jefe_piso, becaId);
-    res.status(201).json(piso);
-  } catch (error) {
-    next(error); //Error de servidor 500
   }
-});
+);
 
 /**
  * @swagger
@@ -114,35 +118,39 @@ router.post("/pisos/create", async (req, res, next) => {
  *       500:
  *         description: Error de servidor
  */
-router.put("/pisos/update/:id", async (req, res, next) => {
-  try {
-    const { numero_piso, jefe_piso, becaId } = req.body;
-    const { id } = req.params;
+router.put(
+  "/pisos/update/:id",
+  authenticate(["administrador", "gestor"]),
+  async (req, res, next) => {
+    try {
+      const { numero_piso, jefe_piso, becaId } = req.body;
+      const { id } = req.params;
 
-    if (!id) {
-      throw new AppError("El id es requerido", 400);
+      if (!id) {
+        throw new AppError("El id es requerido", 400);
+      }
+
+      if (!numero_piso || !jefe_piso || !becaId) {
+        throw new AppError("Todos los campos son requeridos", 400);
+      }
+
+      const piso = await updatePiso(id, numero_piso, jefe_piso, becaId);
+      if (piso == 0) {
+        throw new AppError("Piso no encontrado", 404);
+      }
+
+      res.status(200).json({
+        mensaje: "Piso actualizado",
+        id: id,
+        numero_piso,
+        jefe_piso,
+        becaId,
+      });
+    } catch (error) {
+      next(error);
     }
-
-    if (!numero_piso || !jefe_piso || !becaId) {
-      throw new AppError("Todos los campos son requeridos", 400);
-    }
-
-    const piso = await updatePiso(id, numero_piso, jefe_piso, becaId);
-    if (piso == 0) {
-      throw new AppError("Piso no encontrado", 404);
-    }
-
-    res.status(200).json({ 
-      mensaje: "Piso actualizado",
-      id: id,
-      numero_piso,
-      jefe_piso,
-      becaId 
-    });
-  } catch (error) {
-    next(error);
   }
-});
+);
 
 /**
  * @swagger
@@ -168,23 +176,27 @@ router.put("/pisos/update/:id", async (req, res, next) => {
  *       500:
  *         description: Error de servidor
  */
-router.delete("/pisos/delete/:id", async (req, res, next) => {
-  try {
-    const { id } = req.params;
+router.delete(
+  "/pisos/delete/:id",
+  authenticate(["administrador", "gestor"]),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
 
-    if (!id) {
-      throw new AppError("El id es requerido", 400);
+      if (!id) {
+        throw new AppError("El id es requerido", 400);
+      }
+
+      const piso = await deletePiso(id);
+      if (piso == 0) {
+        throw new AppError("Piso no encontrado", 404);
+      }
+
+      res.status(200).json({ mensaje: "Piso eliminado " });
+    } catch (error) {
+      next(error); //Error de servidor 500
     }
-
-    const piso = await deletePiso(id);
-    if (piso == 0) {
-      throw new AppError("Piso no encontrado", 404);
-    }
-
-    res.status(200).json({ mensaje: "Piso eliminado " });
-  } catch (error) {
-   next(error); //Error de servidor 500
   }
-});
+);
 
 module.exports = router;

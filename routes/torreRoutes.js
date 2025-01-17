@@ -26,14 +26,18 @@ const AppError = require("../error/AppError");
  *       500:
  *         description: Error de servidor
  */
-router.get("/torres", async (req, res, next) => {
-  try {
-    const torres = await getTorre();
-    res.status(200).json(torres);
-  } catch (error) {
-    next(error);
+router.get(
+  "/torres",
+  authenticate(["administrador", "gestor"]),
+  async (req, res, next) => {
+    try {
+      const torres = await getTorre();
+      res.status(200).json(torres);
+    } catch (error) {
+      next(error);
+    }
   }
-});
+);
 
 /**
  * @swagger
@@ -63,20 +67,24 @@ router.get("/torres", async (req, res, next) => {
  *       500:
  *         description: Error de servidor
  */
-router.post("/torres/create", async (req, res, next) => {
-  try {
-    const { jefe_torre, nombre_torre, pisoId } = req.body;
+router.post(
+  "/torres/create",
+  authenticate(["administrador", "gestor"]),
+  async (req, res, next) => {
+    try {
+      const { jefe_torre, nombre_torre, pisoId } = req.body;
 
-    if (!jefe_torre || !nombre_torre || !pisoId) {
-      throw new AppError("Todos los campos son requeridos", 400);
+      if (!jefe_torre || !nombre_torre || !pisoId) {
+        throw new AppError("Todos los campos son requeridos", 400);
+      }
+
+      const torre = await createTorre(jefe_torre, nombre_torre, pisoId);
+      res.status(201).json(torre);
+    } catch (error) {
+      next(error); //Error de servidor 500
     }
-
-    const torre = await createTorre(jefe_torre, nombre_torre, pisoId);
-    res.status(201).json(torre);
-  } catch (error) {
-    next(error); //Error de servidor 500
   }
-});
+);
 
 /**
  * @swagger
@@ -115,35 +123,39 @@ router.post("/torres/create", async (req, res, next) => {
  *       500:
  *         description: Error de servidor
  */
-router.put("/torres/update/:id", async (req, res, next) => {
-  try {
-    const { jefe_torre, nombre_torre, pisoId } = req.body;
-    const { id } = req.params;
+router.put(
+  "/torres/update/:id",
+  authenticate(["administrador", "gestor"]),
+  async (req, res, next) => {
+    try {
+      const { jefe_torre, nombre_torre, pisoId } = req.body;
+      const { id } = req.params;
 
-    if (!id) {
-      throw new AppError("El id es requerido", 400);
+      if (!id) {
+        throw new AppError("El id es requerido", 400);
+      }
+
+      if (!jefe_torre || !nombre_torre || !pisoId) {
+        throw new AppError("Todos los campos son requeridos", 400);
+      }
+
+      const torre = await updateTorre(id, jefe_torre, nombre_torre, pisoId);
+      if (torre == 0) {
+        throw new AppError("Torre no encontrada", 404);
+      }
+
+      res.status(200).json({
+        mensaje: "Torre actualizada",
+        id: id,
+        nombre_torre,
+        jefe_torre,
+        pisoId,
+      });
+    } catch (error) {
+      next(error);
     }
-
-    if (!jefe_torre || !nombre_torre || !pisoId) {
-      throw new AppError("Todos los campos son requeridos", 400);
-    }
-
-    const torre = await updateTorre(id, jefe_torre, nombre_torre, pisoId);
-    if (torre == 0) {
-      throw new AppError("Torre no encontrada", 404);
-    }
-
-    res.status(200).json({
-      mensaje: "Torre actualizada",
-      id: id,
-      nombre_torre,
-      jefe_torre,
-      pisoId,
-    });
-  } catch (error) {
-    next(error);
   }
-});
+);
 
 /**
  * @swagger
@@ -169,23 +181,27 @@ router.put("/torres/update/:id", async (req, res, next) => {
  *       500:
  *         description: Error de servidor
  */
-router.delete("/torres/delete/:id", async (req, res, next) => {
-  try {
-    const { id } = req.params;
+router.delete(
+  "/torres/delete/:id",
+  authenticate(["administrador", "gestor"]),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
 
-    if (!id) {
-      throw new AppError("El id es requerido", 400);
+      if (!id) {
+        throw new AppError("El id es requerido", 400);
+      }
+
+      const torre = await deleteTorre(id);
+      if (torre == 0) {
+        throw new AppError("Torre no encontrada", 404);
+      }
+
+      res.status(200).json({ mensaje: "Torre eliminada " });
+    } catch (error) {
+      next(error);
     }
-
-    const torre = await deleteTorre(id);
-    if (torre == 0) {
-      throw new AppError("Torre no encontrada", 404);
-    }
-
-    res.status(200).json({ mensaje: "Torre eliminada " });
-  } catch (error) {
-    next(error);
   }
-});
+);
 
 module.exports = router;

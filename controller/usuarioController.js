@@ -6,6 +6,7 @@
 //401 no autorizado 
 //403 prohibido
 
+const { hashPassword } = require("../helpers/hashPass");
 const Usuario = require("../models/usuarios");
 
 const getUsuario = async () => {
@@ -16,20 +17,32 @@ const getUsuario = async () => {
     throw error;
   }
 };
-
-const createUsuario = async (nombre_usuario, contrasena) => {
+const getUsuarioById = async (id) => {
   try {
-    const usuario = await Usuario.create({ nombre_usuario, contrasena });
+    const usuario = await Usuario.findByPk(id);
     return usuario;
   } catch (error) {
     throw error;
   }
 };
 
-const updateUsuario = async (id, nombre_usuario, contrasena) => {
+const createUsuario = async (nombre_usuario, contrasena, role) => {
   try {
+    const hashedPass = await hashPassword(contrasena);
+    console.log(hashedPass)
+    const usuario = await Usuario.create({ nombre_usuario, contrasena:hashedPass, role });
+    return usuario;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const updateUsuario = async (id, nombre_usuario, contrasena, role) => {
+  try {
+    const hashedPass = await hashPassword(contrasena)
+
     const usuario = await Usuario.update(
-      { nombre_usuario, contrasena },
+      { nombre_usuario, hashedPass, role },
       { where: { id } }
     );
     return usuario;
@@ -48,5 +61,5 @@ const deleteUsuario = async (id) => {
       throw error;
     }
   };
-module.exports = { createUsuario ,updateUsuario, getUsuario, deleteUsuario};
+module.exports = { createUsuario ,updateUsuario, getUsuario, deleteUsuario, getUsuarioById};
    

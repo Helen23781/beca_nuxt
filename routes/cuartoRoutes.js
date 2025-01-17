@@ -8,6 +8,7 @@ const {
   getCuartosPorTorre,
 } = require("../controller/cuartoController");
 const AppError = require("../error/AppError");
+const authenticate = require("../middlewares/authenticate");
 /**
  * @swagger
  * /cuartos:
@@ -64,26 +65,32 @@ router.get("/cuartos", async (req, res, next) => {
  *       500:
  *         description: Error de servidor
  */
-router.post("/cuartos/create", async (req, res, next) => {
-  console.log(req.body)
-  try {
-    const { numero_cuarto, capacidad_maxima, torreid } = req.body;
+router.post(
+  "/cuartos/create",
+  authenticate(["administrador", "gestor"]),
+  async (req, res, next) => {
+    try {
+      const { numero_cuarto, capacidad_maxima, torreid } = req.body;
 
-    if (!numero_cuarto || !capacidad_maxima || !torreid) {
-      throw new AppError("Todos los campos son requeridos", 400);
+      if (!numero_cuarto || !capacidad_maxima || !torreid) {
+        throw new AppError("Todos los campos son requeridos", 400);
+      }
+
+      const cuarto = await createCuarto(
+        numero_cuarto,
+        capacidad_maxima,
+        torreid
+      );
+      res.status(201).json(cuarto);
+    } catch (error) {
+      next(error);
     }
-
-    const cuarto = await createCuarto(numero_cuarto, capacidad_maxima, torreid);
-    res.status(201).json(cuarto);
-  } catch (error) {
-    next(error);
   }
-});
-
+);
 
 /**
  * @swagger
- * /cuartos/update/{id}: 
+ * /cuartos/update/{id}:
  *   put:
  *     summary: Actualiza un cuarto existente
  *     tags:
@@ -118,35 +125,44 @@ router.post("/cuartos/create", async (req, res, next) => {
  *       500:
  *         description: Error de servidor
  */
-router.put("/cuartos/update/:id", async (req, res, next) => {
-  //:id es para recibir parámetros
-  try {
-    const { numero_cuarto, capacidad_maxima, torreId } = req.body;
-    const { id } = req.params;
+router.put(
+  "/cuartos/update/:id",
+  authenticate(["administrador", "gestor"]),
+  async (req, res, next) => {
+    //:id es para recibir parámetros
+    try {
+      const { numero_cuarto, capacidad_maxima, torreId } = req.body;
+      const { id } = req.params;
 
-    if (!id) {
-      throw new AppError("El id es requerido", 400);
-    }
+      if (!id) {
+        throw new AppError("El id es requerido", 400);
+      }
 
-    if (!numero_cuarto || !capacidad_maxima || !torreId) {
-      throw new AppError("Todos los campos son reuqeridos", 400);
-    }
-    const cuarto = await updateCuarto(id, numero_cuarto, capacidad_maxima, torreId);
-    if (cuarto == 0) {
-      throw new AppError("Cuarto no encontrado", 404);
-    }
+      if (!numero_cuarto || !capacidad_maxima || !torreId) {
+        throw new AppError("Todos los campos son reuqeridos", 400);
+      }
+      const cuarto = await updateCuarto(
+        id,
+        numero_cuarto,
+        capacidad_maxima,
+        torreId
+      );
+      if (cuarto == 0) {
+        throw new AppError("Cuarto no encontrado", 404);
+      }
 
-    res.status(200).json({
-      mensaje: "Cuarto actualizado",
-      id: id,
-      numero_cuarto,
-      capacidad_maxima,
-      torreId,
-    });
-  } catch (error) {
-    next(error);
+      res.status(200).json({
+        mensaje: "Cuarto actualizado",
+        id: id,
+        numero_cuarto,
+        capacidad_maxima,
+        torreId,
+      });
+    } catch (error) {
+      next(error);
+    }
   }
-});
+);
 
 /**
  * @swagger
@@ -172,25 +188,29 @@ router.put("/cuartos/update/:id", async (req, res, next) => {
  *       500:
  *         description: Error de servidor
  */
-router.delete("/cuartos/delete/:id", async (req, res, next) => {
-  //:id es para recibir parámetros
-  try {
-    const { id } = req.params;
+router.delete(
+  "/cuartos/delete/:id",
+  authenticate(["administrador", "gestor"]),
+  async (req, res, next) => {
+    //:id es para recibir parámetros
+    try {
+      const { id } = req.params;
 
-    if (!id) {
-      throw new AppError("El id es requerido", 400);
+      if (!id) {
+        throw new AppError("El id es requerido", 400);
+      }
+
+      const cuarto = await deleteCuarto(id);
+      if (cuarto == 0) {
+        throw new AppError("Cuarto no encontrado", 404);
+      }
+
+      res.status(200).json({ mensaje: "Cuarto eliminado " });
+    } catch (error) {
+      next(error); //Error de servidor 500
     }
-
-    const cuarto = await deleteCuarto(id);
-    if (cuarto == 0) {
-      throw new AppError("Cuarto no encontrado", 404);
-    }
-
-    res.status(200).json({ mensaje: "Cuarto eliminado " });
-  } catch (error) {
-    next(error); //Error de servidor 500
   }
-});
+);
 
 /**
  * @swagger
@@ -220,17 +240,21 @@ router.delete("/cuartos/delete/:id", async (req, res, next) => {
  *       500:
  *         description: Error de servidor
  */
-router.get("/cuartos/torre/:torreId", async (req, res, next) => {
-  try {
-    const { torreId } = req.params;
-    const cuartos = await getCuartosPorTorre(torreId);
-    if (!cuartos.length) {
-      return res.status(404).json({ mensaje: "Cuartos no encontrados" });
+router.get(
+  "/cuartos/torre/:torreId",
+  authenticate(["administrador", "gestor"]),
+  async (req, res, next) => {
+    try {
+      const { torreId } = req.params;
+      const cuartos = await getCuartosPorTorre(torreId);
+      if (!cuartos.length) {
+        return res.status(404).json({ mensaje: "Cuartos no encontrados" });
+      }
+      res.status(200).json(cuartos);
+    } catch (error) {
+      next(error);
     }
-    res.status(200).json(cuartos);
-  } catch (error) {
-    next(error);
   }
-});
+);
 
 module.exports = router;
