@@ -367,19 +367,15 @@ router.get(
  *       500:
  *         description: Error de servidor
  */
-router.get(
-  "/estudiantes/foto/:filename",
-  authenticate(["administrador", "gestor"]),
-  (req, res, next) => {
-    const { filename } = req.params;
-    const filePath = path.join(__dirname, "../uploads", filename);
+router.get("/estudiantes/foto/:filename", (req, res, next) => {
+  const { filename } = req.params;
+  const filePath = path.join(__dirname, "../uploads", filename);
 
-    res.sendFile(filePath, (err) => {
-      if (err) {
-        next(new AppError("Foto no encontrada", 404));
-      }
-    });
-  }
-);
+  res.sendFile(filePath, (err) => {
+    if (err) {
+      next(new AppError("Foto no encontrada", 404));
+    }
+  });
+});
 
 module.exports = router;

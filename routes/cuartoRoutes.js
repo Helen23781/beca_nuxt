@@ -28,14 +28,18 @@ const authenticate = require("../middlewares/authenticate");
  *       500:
  *         description: Error de servidor
  */
-router.get("/cuartos", async (req, res, next) => {
-  try {
-    const cuartos = await getCuarto();
-    res.status(200).json(cuartos);
-  } catch (error) {
-    next(error); //Error de servidor 500
+router.get(
+  "/cuartos",
+  authenticate(["administrador", "gestor"]),
+  async (req, res, next) => {
+    try {
+      const cuartos = await getCuarto();
+      res.status(200).json(cuartos);
+    } catch (error) {
+      next(error); //Error de servidor 500
+    }
   }
-});
+);
 
 /**
  * @swagger

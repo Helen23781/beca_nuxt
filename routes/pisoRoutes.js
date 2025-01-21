@@ -6,6 +6,7 @@ const {
   updatePiso,
 } = require("../controller/pisoController");
 const AppError = require("../error/AppError");
+const authenticate = require("../middlewares/authenticate");
 
 /**
  * @swagger

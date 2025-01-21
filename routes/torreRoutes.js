@@ -7,6 +7,7 @@ const {
   deleteTorre,
 } = require("../controller/torreController");
 const AppError = require("../error/AppError");
+const authenticate = require("../middlewares/authenticate");
 /**
  * @swagger
  * /torres:
