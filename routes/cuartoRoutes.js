@@ -135,21 +135,21 @@ router.put(
   async (req, res, next) => {
     //:id es para recibir parámetros
     try {
-      const { numero_cuarto, capacidad_maxima, torreId } = req.body;
+      const { numero_cuarto, capacidad_maxima, torreid } = req.body;
       const { id } = req.params;
 
       if (!id) {
         throw new AppError("El id es requerido", 400);
       }
 
-      if (!numero_cuarto || !capacidad_maxima || !torreId) {
+      if (!numero_cuarto || !capacidad_maxima || !torreid) {
         throw new AppError("Todos los campos son reuqeridos", 400);
       }
       const cuarto = await updateCuarto(
         id,
         numero_cuarto,
         capacidad_maxima,
-        torreId
+        torreid
       );
       if (cuarto == 0) {
         throw new AppError("Cuarto no encontrado", 404);
@@ -160,7 +160,7 @@ router.put(
         id: id,
         numero_cuarto,
         capacidad_maxima,
-        torreId,
+        torreid,
       });
     } catch (error) {
       next(error);
