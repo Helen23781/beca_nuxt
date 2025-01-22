@@ -73,6 +73,15 @@ const updateEstudiante = async (
   foto
 ) => {
   try {
+    // Obtener el estudiante actual para verificar la foto existente
+    const estudianteActual = await Estudiantes.findByPk(id);
+    if (!estudianteActual) {
+      throw new Error("Estudiante no encontrado");
+    }
+
+    // Si no se proporciona una nueva foto, mantener la existente
+    const fotoActualizada = foto || estudianteActual.foto;
+
     const estudiante = await Estudiantes.update(
       {
         nombre_estudiante,
@@ -82,7 +91,7 @@ const updateEstudiante = async (
         carrera,
         facultad,
         cuartoId,
-        foto,
+        foto: fotoActualizada,
       },
       { where: { id } }
     );
@@ -101,12 +110,9 @@ const deleteEstudiante = async (id) => {
   }
 };
 
-
-
 module.exports = {
   createEstudiante,
   updateEstudiante,
   getEstudiantes,
   deleteEstudiante,
- 
 };
