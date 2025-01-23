@@ -3,7 +3,7 @@
 //get
 //delete
 const router = require("express").Router();
-const AppError = require("../error/AppError")
+const AppError = require("../error/AppError");
 const authenticate = require("../middlewares/authenticate");
 
 const {
@@ -11,6 +11,7 @@ const {
   deleteUsuario,
   getUsuario,
   updateUsuario,
+  updateMiCuenta,
 } = require("../controller/usuarioController");
 
 /**
@@ -32,16 +33,18 @@ const {
  *       500:
  *         description: Error de servidor
  */
-router.get("/usuarios",
+router.get(
+  "/usuarios",
   authenticate(["administrador"]),
-   async (req, res, next) => {
-  try {
-    const usuarios = await getUsuario();
-    res.status(200).json(usuarios);
-  } catch (error) {
-    next(error); //Error de servidor 500
+  async (req, res, next) => {
+    try {
+      const usuarios = await getUsuario();
+      res.status(200).json(usuarios);
+    } catch (error) {
+      next(error); //Error de servidor 500
+    }
   }
-});
+);
 
 /**
  * @swagger
@@ -71,21 +74,25 @@ router.get("/usuarios",
  *       500:
  *         description: Error de servidor
  */
-  authenticate(["administrador"]),
-  router.post("/usuarios/create",  async (req, res, next) => {
-  try {
-    const { nombre_usuario, contrasena, role } = req.body;
-    console.log("hoallaalallal");
 
-    if (!nombre_usuario || !contrasena || !role) {
-      throw new AppError("Todos los campos son reuqeridos", 400);
+router.post(
+  "/usuarios/create",
+  authenticate(["administrador"]),
+  async (req, res, next) => {
+    try {
+      const { nombre_usuario, contrasena, role } = req.body;
+      console.log("hoallaalallal");
+
+      if (!nombre_usuario || !contrasena || !role) {
+        throw new AppError("Todos los campos son reuqeridos", 400);
+      }
+      const usuario = await createUsuario(nombre_usuario, contrasena, role);
+      res.status(201).json(usuario);
+    } catch (error) {
+      next(error); //Error de servidor 500
     }
-    const usuario = await createUsuario(nombre_usuario, contrasena, role);
-    res.status(201).json(usuario);
-  } catch (error) {
-    next(error); //Error de servidor 500
   }
-});
+);
 
 /**
  * @swagger
@@ -124,31 +131,33 @@ router.get("/usuarios",
  *       500:
  *         description: Error de servidor
  */
-router.put("/usuarios/update/:id", 
+router.put(
+  "/usuarios/update/:id",
   authenticate(["administrador"]),
   async (req, res, next) => {
-  //:id es para rcibir parametros
-  try {
-    const { nombre_usuario, contrasena } = req.body;
-    const { id } = req.params;
+    //:id es para rcibir parametros
+    try {
+      const { nombre_usuario, contrasena } = req.body;
+      const { id } = req.params;
 
-    if (!id) {
-      throw new AppError("El id es requerido", 400);
-    }
+      if (!id) {
+        throw new AppError("El id es requerido", 400);
+      }
 
-    if (!nombre_usuario || !contrasena) {
-      throw new AppError("Todos los campos son reuqeridos", 400);
-    }
-    const usuario = await updateUsuario(id, nombre_usuario, contrasena);
-    if (usuario == 0) {
-      throw new AppError("Usuario no encontrado", 404);
-    }
+      if (!nombre_usuario || !contrasena) {
+        throw new AppError("Todos los campos son reuqeridos", 400);
+      }
+      const usuario = await updateUsuario(id, nombre_usuario, contrasena);
+      if (usuario == 0) {
+        throw new AppError("Usuario no encontrado", 404);
+      }
 
-    res.status(200).json({ mensaje: "Usuario actualizado " });
-  } catch (error) {
-    next(error); //Error de servidor 500
+      res.status(200).json({ mensaje: "Usuario actualizado " });
+    } catch (error) {
+      next(error); //Error de servidor 500
+    }
   }
-});
+);
 
 /**
  * @swagger
@@ -174,27 +183,53 @@ router.put("/usuarios/update/:id",
  *       500:
  *         description: Error de servidor
  */
-router.delete("/usuarios/delete/:id",
+router.delete(
+  "/usuarios/delete/:id",
   authenticate(["administrador"]),
-   async (req, res, next) => {
-  //:id es para rcibir parametros
-  try {
-    const { id } = req.params;
+  async (req, res, next) => {
+    //:id es para rcibir parametros
+    try {
+      const { id } = req.params;
 
-    if (!id) {
-      throw new AppError("El id es requerido", 400);
+      if (!id) {
+        throw new AppError("El id es requerido", 400);
+      }
+
+      const usuario = await deleteUsuario(id);
+      if (usuario == 0) {
+        throw new AppError("Usuario no encontrado", 404);
+      }
+
+      res.status(200).json({ mensaje: "Usuario eliminado " });
+    } catch (error) {
+      next(error); //Error de servidor 500
     }
-
-    const usuario = await deleteUsuario(id);
-    if (usuario == 0) {
-      throw new AppError("Usuario no encontrado", 404);
-    }
-
-    res.status(200).json({ mensaje: "Usuario eliminado " });
-  } catch (error) {
-    next(error); //Error de servidor 500
   }
-});
+);
 
+// Nueva ruta para actualizar la cuenta del usuario autenticado
+router.put(
+  "/mi-cuenta",
+  authenticate(["administrador", "gestor"]),
+  async (req, res, next) => {
+    try {
+      const { nombre_usuario, contrasena } = req.body;
+      const userId = req.userData.id;
+
+      if (!nombre_usuario && !contrasena) {
+        throw new AppError("Al menos un campo es requerido", 400);
+      }
+
+      const usuario = await updateMiCuenta(userId, nombre_usuario, contrasena);
+      if (!usuario) {
+        throw new AppError("Usuario no encontrado", 404);
+      }
+
+      res.status(200).json({ mensaje: "Cuenta actualizada exitosamente" });
+    } catch (error) {
+      next(error); // Error de servidor 500
+    }
+  }
+);
 
 module.exports = router;

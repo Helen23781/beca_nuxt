@@ -14,7 +14,12 @@ const authenticate = (roles) => {
         req.userData = { id: decodedToken.id };
         next();
       } else {
-        return next(new AppError("Usted no posee el rol necesario para realizar esa acción", 403));
+        return next(
+          new AppError(
+            "Usted no posee el rol necesario para realizar esa acción",
+            403
+          )
+        );
       }
     } catch (error) {
       return next(new AppError("Permiso denegado", 403));
