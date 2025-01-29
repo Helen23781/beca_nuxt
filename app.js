@@ -1,7 +1,7 @@
 const sequelize = require("./helpers/database.js");
 const express = require("express");
 const cors = require("cors");
-const bodyParser = require('body-parser');
+const bodyParser = require("body-parser");
 
 const swaggerUi = require("swagger-ui-express");
 const swaggerJsdoc = require("swagger-jsdoc");
@@ -70,7 +70,10 @@ app.use(express.urlencoded({ extended: true }));
 // Definición de corsOptions
 
 // Uso de Cors
-const allowsOrigins = ["http://localhost:3000"];
+const allowsOrigins = [
+  "https://beca-nuxt-fontend3.onrender.com",
+  "http://localhost:3000",
+];
 app.use(
   cors({
     origin: allowsOrigins,
@@ -95,15 +98,17 @@ app.use("/", authRoutes);
 
 app.use(errorHandler);
 
-app.use(bodyParser.json({ limit: '10mb' }));
-app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
+app.use(bodyParser.json({ limit: "10mb" }));
+app.use(bodyParser.urlencoded({ limit: "10mb", extended: true }));
 
 // Uso del middleware de requestLogger
 
 app.listen(process.env.PORT, () => {
   console.log(`Servidor iniciado en el puerto ${process.env.PORT}`);
   console.log(`http://localhost:${process.env.PORT}`);
-  console.log(`Documentacion de swagger: http://localhost:${process.env.PORT}/api-docs`);
+  console.log(
+    `Documentacion de swagger: http://localhost:${process.env.PORT}/api-docs`
+  );
 });
 
 // Sincronizar los modelos para verificar la conexión con la base de datos
@@ -115,5 +120,3 @@ sequelize
   .catch((err) => {
     console.log("Ha ocurrido un error al sincronizar los modelos: ", err);
   });
-
-
