@@ -1,3 +1,4 @@
+const AppError = require("../error/AppError");
 const Cuarto = require("../models/cuartos");
 const Torre = require("../models/torres");
 const Piso = require("../models/pisos");
@@ -9,21 +10,20 @@ const getCuarto = async () => {
       include: [
         {
           model: Torre,
-          
+
           include: [
             {
               model: Piso,
-             
+
               include: [
                 {
                   model: Beca,
-                  
-                }
-              ]
-            }
-          ]
-        }
-      ]
+                },
+              ],
+            },
+          ],
+        },
+      ],
     });
     return cuartos;
   } catch (error) {
@@ -31,12 +31,12 @@ const getCuarto = async () => {
   }
 };
 
-const createCuarto = async (numero_cuarto, capacidad_maxima,torreid) => {
+const createCuarto = async (numero_cuarto, capacidad_maxima, torreid) => {
   try {
     const cuarto = await Cuarto.create({
       numero_cuarto,
       capacidad_maxima,
-      torreid
+      torreid,
     });
     return cuarto;
   } catch (error) {
@@ -47,9 +47,7 @@ const createCuarto = async (numero_cuarto, capacidad_maxima,torreid) => {
 const updateCuarto = async (id, numero_cuarto, capacidad_maxima, torreid) => {
   try {
     const cuarto = await Cuarto.update(
-      { numero_cuarto, 
-        capacidad_maxima, 
-        torreid },
+      { numero_cuarto, capacidad_maxima, torreid },
       { where: { id } }
     );
     return cuarto;
@@ -68,14 +66,29 @@ const deleteCuarto = async (id) => {
 
 const getCuartosPorTorre = async (torreId) => {
   try {
+    // Verificar si hay pisos asociados a la beca
+    const estudiantesAsociados = await Estuadiantes.count({
+      where: { cuartoId: id },
+    });
+    if (estudiantesAsociados > 0) {
+      throw new AppError(
+        "No se puede eliminar el cuarto cuando esta tiene datos dentro.",
+        400
+      );
+    }
     const cuartos = await Cuarto.findAll({
       where: { torreid: torreId },
     });
     return cuartos;
   } catch (error) {
     throw error;
-  } 
+  }
 };
 
-module.exports = { createCuarto, updateCuarto, getCuarto, deleteCuarto, getCuartosPorTorre };
-
+module.exports = {
+  createCuarto,
+  updateCuarto,
+  getCuarto,
+  deleteCuarto,
+  getCuartosPorTorre,
+};

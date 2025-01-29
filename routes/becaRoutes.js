@@ -185,7 +185,6 @@ router.delete(
   "/becas/delete/:id",
   authenticate(["administrador", "gestor"]),
   async (req, res, next) => {
-    //:id es para rcibir parametros
     try {
       const { id } = req.params;
 
@@ -195,10 +194,10 @@ router.delete(
 
       const beca = await deleteBeca(id);
       if (beca == 0) {
-        throw new AppError("El id es requerido", 400);
+        throw new AppError("Beca no encontrada", 404);
       }
 
-      res.status(200).json({ mensaje: "Beca eliminado " });
+      res.status(200).json({ mensaje: "Beca eliminada" });
     } catch (error) {
       next(error);
     }
