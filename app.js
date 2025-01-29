@@ -73,6 +73,7 @@ app.use(express.urlencoded({ extended: true }));
 const allowsOrigins = [
   "https://beca-nuxt-fontend3.onrender.com",
   "http://localhost:3000",
+  "*",
 ];
 app.use(
   cors({
