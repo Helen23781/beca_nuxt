@@ -64,7 +64,7 @@ const deleteCuarto = async (id) => {
   }
 };
 
-const getCuartosPorTorre = async (torreId) => {
+const getCuartosPorTorre = async (torreid) => {
   try {
     // Verificar si hay pisos asociados a la beca
     const estudiantesAsociados = await Estuadiantes.count({
@@ -77,7 +77,7 @@ const getCuartosPorTorre = async (torreId) => {
       );
     }
     const cuartos = await Cuarto.findAll({
-      where: { torreid: torreId },
+      where: { torreid: torreid },
     });
     return cuartos;
   } catch (error) {

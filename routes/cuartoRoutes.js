@@ -117,7 +117,7 @@ router.post(
  *                 type: string
  *               capacidad_maxima:
  *                 type: integer
- *               torreId:
+ *               torreid:
  *                 type: integer
  *     responses:
  *       200:
@@ -218,14 +218,14 @@ router.delete(
 
 /**
  * @swagger
- * /cuartos/torre/{torreId}:
+ * /cuartos/torre/{torreid}:
  *   get:
  *     summary: Obtiene una lista de cuartos por torre
  *     tags:
  *       - Cuarto
  *     parameters:
  *       - in: path
- *         name: torreId
+ *         name: torreid
  *         required: true
  *         schema:
  *           type: integer
@@ -245,11 +245,11 @@ router.delete(
  *         description: Error de servidor
  */
 router.get(
-  "/cuartos/torre/:torreId",
+  "/cuartos/torre/:torreid",
   authenticate(["administrador", "gestor"]),
   async (req, res, next) => {
     try {
-      const { torreId } = req.params;
+      const { torreid } = req.params;
       const cuartos = await getCuartosPorTorre(torreId);
       if (!cuartos.length) {
         return res.status(404).json({ mensaje: "Cuartos no encontrados" });
