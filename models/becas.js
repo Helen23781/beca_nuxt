@@ -29,6 +29,7 @@ const Becas = sequelize.define(
     nombre_beca: {
       type: DataTypes.STRING,
       allowNull: false,
+      unique: true,
     },
     jefe_beca: {
       type: DataTypes.STRING,

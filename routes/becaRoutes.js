@@ -89,6 +89,9 @@ router.post(
       const beca = await createBeca(nombre_beca, jefe_beca);
       res.status(201).json(beca);
     } catch (error) {
+      if (error?.parent?.detail.includes("nombre_beca")) {
+        return next(new AppError("Ya existe la beca", 400));
+      }
       next(error); //Error de servidor 500
     }
   }
@@ -152,6 +155,9 @@ router.put(
 
       res.status(200).json({ mensaje: "Usuario actualizado " });
     } catch (error) {
+      if (error?.parent?.detail.includes("nombre_beca")) {
+        return next(new AppError("Ya existe la beca", 400));
+      }
       next(error); //Error de servidor 500
     }
   }

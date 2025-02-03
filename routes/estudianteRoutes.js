@@ -85,6 +85,8 @@ router.get(
  *               foto:
  *                 type: string
  *                 format: binary
+ *               ci:
+ *                 type: string
  *     responses:
  *       201:
  *         description: Estudiante creado
@@ -107,6 +109,7 @@ router.post(
         carrera,
         facultad,
         cuartoId,
+        ci,
       } = req.body;
       const foto = req.file ? req.file.filename : null;
 
@@ -117,7 +120,8 @@ router.post(
         !edad ||
         !carrera ||
         !facultad ||
-        !cuartoId
+        !cuartoId ||
+        !ci
       ) {
         throw new AppError("Todos los campos son requeridos", 400);
       }
@@ -130,10 +134,19 @@ router.post(
         carrera,
         facultad,
         cuartoId,
-        foto
+        foto,
+        ci
       );
       res.status(201).json(estudiante);
     } catch (error) {
+      if (error?.parent?.detail.includes("ci")) {
+        return next(
+          new AppError(
+            "Ya existe un estudainte con ese carnet de identidad",
+            400
+          )
+        );
+      }
       next(error);
     }
   }
@@ -177,6 +190,8 @@ router.post(
  *               foto:
  *                 type: string
  *                 format: binary
+ *               ci:
+ *                 type: string
  *     responses:
  *       200:
  *         description: Estudiante actualizado
@@ -201,6 +216,7 @@ router.put(
         carrera,
         facultad,
         cuartoId,
+        ci,
       } = req.body;
       const { id } = req.params;
       const foto = req.file ? req.file.filename : null;
@@ -216,7 +232,8 @@ router.put(
         !edad ||
         !carrera ||
         !facultad ||
-        !cuartoId
+        !cuartoId ||
+        !ci
       ) {
         throw new AppError("Todos los campos son requeridos", 400);
       }
@@ -230,7 +247,8 @@ router.put(
         carrera,
         facultad,
         cuartoId,
-        foto
+        foto,
+        ci
       );
       if (estudiante == 0) {
         throw new AppError("Estudiante no encontrado", 404);
@@ -247,8 +265,17 @@ router.put(
         facultad,
         cuartoId,
         foto,
+        ci,
       });
     } catch (error) {
+      if (error?.parent?.detail.includes("ci")) {
+        return next(
+          new AppError(
+            "Ya existe un estudainte con ese carnet de identidad",
+            400
+          )
+        );
+      }
       next(error);
     }
   }

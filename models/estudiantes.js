@@ -32,7 +32,14 @@ const sequelize = require("../helpers/database");
  *           type: string
  *           description: La facultad a la que pertenece el estudiante.
  *           example: "Facultad de Ingeniería"
- *
+ *         foto:
+ *           type: string
+ *           description: La foto del estudiante.
+ *           example: "foto.jpg"
+ *         ci:
+ *           type: string
+ *           description: La cédula de identidad del estudiante.
+ *           example: "1234567890"
  *       required:
  *         - nombre_estudiante
  *         - apellido_estudiante
@@ -40,7 +47,8 @@ const sequelize = require("../helpers/database");
  *         - edad
  *         - carrera
  *         - facultad
- *
+ *         - foto
+ *         - ci
  */
 const Estudiantes = sequelize.define(
   "estudiantes",
@@ -69,10 +77,15 @@ const Estudiantes = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    
+
     foto: {
       type: DataTypes.STRING,
       allowNull: true,
+    },
+    ci: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
     },
     // Otros campos del modelo Estudiantes
   },

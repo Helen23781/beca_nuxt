@@ -42,7 +42,8 @@ const createEstudiante = async (
   carrera,
   facultad,
   cuartoId,
-  foto
+  foto,
+  ci
 ) => {
   try {
     const estudiante = await Estudiantes.create({
@@ -54,6 +55,7 @@ const createEstudiante = async (
       facultad,
       cuartoId,
       foto,
+      ci,
     });
     return estudiante;
   } catch (error) {
@@ -70,7 +72,8 @@ const updateEstudiante = async (
   carrera,
   facultad,
   cuartoId,
-  foto
+  foto,
+  ci
 ) => {
   try {
     // Obtener el estudiante actual para verificar la foto existente
@@ -92,6 +95,7 @@ const updateEstudiante = async (
         facultad,
         cuartoId,
         foto: fotoActualizada,
+        ci,
       },
       { where: { id } }
     );
