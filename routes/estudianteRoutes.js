@@ -12,6 +12,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 const path = require("path");
+const { createClient } = require("@supabase/supabase-js");
 
 const {
   createEstudiante,
@@ -21,6 +22,27 @@ const {
 } = require("../controller/estudianteController");
 const AppError = require("../error/AppError");
 const authenticate = require("../middlewares/authenticate");
+
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_KEY = process.env.SUPABASE_KEY;
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const IMAGE_SERVER = process.env.IMAGE_SERVER;
+
+async function uploadToSupabase(file) {
+  const { data, error } = await supabase.storage
+    .from("estudiantes_beca")
+    .upload(
+      file.fieldname + "-" + Date.now() + path.extname(file.originalname),
+      file.buffer
+    );
+
+  if (error) {
+    throw new AppError("Error al subir la imagen a Supabase", 500);
+  }
+
+  return `https://sdhomtufudxcctgtknmz.supabase.co/storage/v1/object/public/estudiantes_beca/${data.path}`;
+}
 
 /**
  * @swagger
@@ -111,7 +133,15 @@ router.post(
         cuartoId,
         ci,
       } = req.body;
-      const foto = req.file ? req.file.filename : null;
+      let foto = null;
+
+      if (req.file) {
+        if (IMAGE_SERVER === "supabase") {
+          foto = await uploadToSupabase(req.file);
+        } else {
+          foto = req.file.filename;
+        }
+      }
 
       if (
         !nombre_estudiante ||
