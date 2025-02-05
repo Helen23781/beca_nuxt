@@ -30,7 +30,8 @@ const getEstudiantes = async () => {
     });
     return estudiantes;
   } catch (error) {
-    throw error;
+    console.error("Error al obtener estudiantes:", error);
+    throw new Error("Error al obtener estudiantes");
   }
 };
 
