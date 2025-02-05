@@ -45,7 +45,7 @@ const updateUsuario = async (id, nombre_usuario, contrasena, role) => {
   try {
     let updateData = { nombre_usuario, role };
 
-    if (contrasena !== null) {
+    if (contrasena) {
       const hashedPass = await hashPassword(contrasena);
       updateData.contrasena = hashedPass;
     }
