@@ -144,7 +144,7 @@ router.put(
         throw new AppError("El id es requerido", 400);
       }
 
-      if (!nombre_usuario || !contrasena) {
+      if (!nombre_usuario) {
         throw new AppError("Todos los campos son reuqeridos", 400);
       }
       const usuario = await updateUsuario(id, nombre_usuario, contrasena);
